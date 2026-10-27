@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('products') }}">{{ icon('arrow-left', 16) }} Back to products</a>
+<div class="page-head"><div><h1>{{ title }}</h1></div></div>
+
+<form method="post" class="card form-card">
+  <div class="form-section">
+    <h2>Basic info</h2>
+    <p class="sub">How the product is identified at the counter.</p>
+    <div class="form-grid">
+      <div class="full"><label>Barcode <small>scan it here, or leave empty to auto-create</small></label>
+        <div class="input-icon">{{ icon('scan') }}<input name="barcode" value="{{ p.barcode or '' }}" autofocus></div></div>
+      <div class="full"><label>Product name *</label><input name="name" value="{{ p.name or '' }}" required></div>
+      <div><label>Category</label><input name="category" value="{{ p.category or 'General' }}" list="cats">
+        <datalist id="cats"><option>Staples</option><option>Oil</option><option>Snacks</option><option>Beverages</option><option>Dairy</option><option>Household</option></datalist></div>
+      <div><label>Unit</label>
+        <select name="unit">
+          {% for u in ['pcs','packet','kg','gram','litre','dozen'] %}<option {{ 'selected' if p.unit == u }}>{{ u }}</option>{% endfor %}
+        </select></div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h2>Pricing</h2>
+    <p class="sub">Selling price includes GST.</p>
+    <div class="form-grid three">
+      <div><label>Cost price (₹) <small>what you paid</small></label><input name="cost_price" type="number" step="0.01" min="0" value="{{ p.cost_price or 0 }}"></div>
+      <div><label>Selling price (₹) * <small>includes GST</small></label><input name="price" type="number" step="0.01" min="0" value="{{ p.price or '' }}" required></div>
+      <div><label>GST %</label>
+        <select name="gst">
+          {% for g in [0,5,12,18,28] %}<option value="{{ g }}" {{ 'selected' if (p.gst or 0)|float == g }}>{{ g }}%</option>{% endfor %}
+        </select></div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h2>Inventory</h2>
+    <p class="sub">Get a warning on the dashboard when stock runs low.</p>
+    <div class="form-grid">
+      <div><label>Stock quantity</label><input name="stock" type="number" step="0.001" min="0" value="{{ p.stock or 0 }}"></div>
+      <div><label>Low-stock warning at</label><input name="min_stock" type="number" step="0.001" min="0" value="{{ 5 if (p.min_stock is not defined or p.min_stock is none) else p.min_stock }}"></div>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn primary">Save product</button>
+    <a class="btn" href="{{ url_for('products') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

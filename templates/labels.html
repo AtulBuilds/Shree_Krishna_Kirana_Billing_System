@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Barcode Labels{% endblock %}
+{% block content %}
+<div class="page-head no-print">
+  <div>
+    <h1>Barcode Labels</h1>
+    <p class="sub">{{ products|length }} label{{ '' if products|length == 1 else 's' }} ready to print</p>
+  </div>
+  <div class="head-actions"><button class="btn primary" onclick="window.print()">{{ icon('printer', 16) }} Print Labels</button></div>
+</div>
+<div class="note no-print">{{ icon('tag', 18) }}<span>Print on sticker paper and stick on items that have no barcode. (Needs internet once to load the barcode drawing library.)</span></div>
+<div class="labels">
+  {% for p in products %}
+  <div class="label">
+    <div class="lname">{{ p.name }}</div>
+    <svg class="bc" data-code="{{ p.barcode }}"></svg>
+    <div class="lprice">₹{{ '%.2f'|format(p.price) }}</div>
+  </div>
+  {% endfor %}
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<script>
+  if (window.JsBarcode) {
+    document.querySelectorAll('svg.bc').forEach(function (el) {
+      JsBarcode(el, el.dataset.code, { format: 'CODE128', height: 40, fontSize: 12, margin: 0 });
+    });
+  }
+</script>
+{% endblock %}

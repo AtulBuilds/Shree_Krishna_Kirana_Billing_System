@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Dashboard</h1>
+    <p class="sub" id="today">Here's how the shop is doing.</p>
+  </div>
+  <div class="head-actions">
+    <a class="btn primary" href="{{ url_for('billing') }}">{{ icon('plus', 16) }} New Bill</a>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="card stat"><div class="stat-ico">{{ icon('rupee', 22) }}</div><div><span>Today's Sales</span><b>₹{{ '%.2f'|format(today_total) }}</b></div></div>
+  <div class="card stat"><div class="stat-ico blue">{{ icon('receipt', 22) }}</div><div><span>Bills Today</span><b>{{ today_bills }}</b></div></div>
+  <div class="card stat"><div class="stat-ico violet">{{ icon('calendar', 22) }}</div><div><span>This Month</span><b>₹{{ '%.2f'|format(month_total) }}</b></div></div>
+  <div class="card stat {{ 'warn' if low_count }}"><div class="stat-ico {{ '' if low_count else 'amber' }}">{{ icon('alert', 22) }}</div><div><span>Low Stock Items</span><b>{{ low_count }}</b></div></div>
+</div>
+
+<div class="grid-main">
+  <div class="card">
+    <div class="row-between" style="margin-bottom:14px"><h2>Last 7 Days Sales</h2><span class="muted">Daily total</span></div>
+    <div class="chart-box"><canvas id="salesChart"></canvas></div>
+  </div>
+  <div class="card flush">
+    <div class="card-head"><h2>Low Stock</h2>{% if low_count %}<span class="badge low">{{ low_count }} to restock</span>{% endif %}</div>
+    {% if low %}
+    <table>
+      <tr><th>Item</th><th class="r">Stock</th></tr>
+      {% for p in low %}<tr><td class="cell-main">{{ p.name }}</td><td class="r"><span class="badge low">{{ '%g'|format(p.stock) }} {{ p.unit }}</span></td></tr>{% endfor %}
+    </table>
+    {% else %}
+    <div class="empty-state">{{ icon('check', 44) }}<b>All stocked up</b>Every item is above its warning level.</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="card flush">
+    <div class="card-head"><h2>Top Items</h2><span class="hint">Last 7 days</span></div>
+    {% if top %}
+    {% set maxamt = (top[0].amt or 1) %}
+    <table>
+      <tr><th>Item</th><th class="r">Qty</th><th class="r">Amount</th></tr>
+      {% for t in top %}
+      <tr>
+        <td><span class="cell-main">{{ t.name }}</span><div class="bar"><i style="width:{{ ((t.amt / maxamt) * 100)|round(1) }}%"></i></div></td>
+        <td class="r">{{ '%g'|format(t.q) }}</td>
+        <td class="r cell-main">₹{{ '%.2f'|format(t.amt) }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}<div class="empty-state">{{ icon('trending', 44) }}<b>No sales yet</b>Make your first bill to see top sellers here.</div>{% endif %}
+  </div>
+  <div class="card flush">
+    <div class="card-head"><h2>Recent Bills</h2><a href="{{ url_for('sales') }}" class="hint">View all</a></div>
+    {% if recent %}
+    <table>
+      <tr><th>Invoice</th><th>Customer</th><th class="r">Total</th></tr>
+      {% for s in recent %}<tr><td><a href="{{ url_for('invoice', sale_id=s.id) }}">{{ s.invoice_no }}</a></td><td>{{ s.customer_name }}</td><td class="r cell-main">₹{{ '%.2f'|format(s.total) }}</td></tr>{% endfor %}
+    </table>
+    {% else %}<div class="empty-state">{{ icon('inbox', 44) }}<b>No bills yet</b>New bills will show up here.</div>{% endif %}
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+  document.getElementById('today').textContent =
+    new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  if (window.KCharts) KCharts.bar('salesChart', {{ labels|tojson }}, {{ values|tojson }});
+</script>
+{% endblock %}

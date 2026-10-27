@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}New Bill{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>New Bill</h1>
+    <p class="sub">Scan items or search by name to build the bill.</p>
+  </div>
+  <div class="shortcuts"><span><kbd>F2</kbd> Focus scan box</span><span><kbd>F9</kbd> Save &amp; print</span></div>
+</div>
+
+<div class="billing">
+  <div class="card pos-main">
+    <div class="pos-top">
+      <label for="scan">Scan barcode or type product name</label>
+      <div class="scan-field">
+        <div class="scan-input">
+          {{ icon('scan', 22) }}
+          <input id="scan" autocomplete="off" autofocus placeholder="Scan barcode here, then press Enter">
+          <kbd>F2</kbd>
+        </div>
+        <div id="suggest" class="suggest"></div>
+      </div>
+      <div id="msg" class="msg"></div>
+    </div>
+
+    <div class="scroll">
+    <table id="cart">
+      <thead><tr><th>#</th><th>Item</th><th class="r">Price</th><th>Qty</th><th class="r">Amount</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    </div>
+    <div id="empty"><div class="ico-wrap">{{ icon('cart', 54) }}</div><b>Cart is empty</b>Scan an item to start the bill.</div>
+  </div>
+
+  <div class="card summary">
+    <h2>Bill Summary</h2>
+    <div class="line"><span>Items</span><b id="count">0</b></div>
+    <div class="line"><span>Subtotal</span><b id="subtotal">₹0.00</b></div>
+
+    <div class="field">
+      <label for="discount">Discount (₹)</label>
+      <div class="input-prefix"><span>₹</span><input id="discount" type="number" min="0" step="0.01" value="0"></div>
+    </div>
+
+    <div class="line total"><span>Total</span><b id="total">₹0.00</b></div>
+
+    <div class="field">
+      <label for="customer">Customer name <small>(optional)</small></label>
+      <input id="customer" placeholder="Walk-in">
+    </div>
+
+    <div class="field">
+      <label for="payment">Payment</label>
+      <select id="payment"><option>Cash</option><option>UPI</option><option>Card</option><option>Credit</option></select>
+      <div class="pay-chips" id="payChips" hidden>
+        <button type="button" class="chip" data-v="Cash" aria-pressed="true">{{ icon('banknote', 20) }}Cash</button>
+        <button type="button" class="chip" data-v="UPI" aria-pressed="false">{{ icon('phone', 20) }}UPI</button>
+        <button type="button" class="chip" data-v="Card" aria-pressed="false">{{ icon('card', 20) }}Card</button>
+        <button type="button" class="chip" data-v="Credit" aria-pressed="false">{{ icon('book', 20) }}Credit</button>
+      </div>
+    </div>
+
+    <button id="checkout" class="btn primary full big">{{ icon('printer', 20) }} Save &amp; Print Bill <kbd>F9</kbd></button>
+    <button id="clear" class="btn full">Clear Cart</button>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/billing.js') }}"></script>
+<script>
+  // Payment method buttons (the <select> above stays the source of truth for billing.js)
+  (function () {
+    var sel = document.getElementById('payment'), box = document.getElementById('payChips');
+    sel.style.display = 'none'; box.hidden = false;
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('.chip'); if (!b) return;
+      sel.value = b.dataset.v;
+      box.querySelectorAll('.chip').forEach(function (c) { c.setAttribute('aria-pressed', c === b ? 'true' : 'false'); });
+    });
+  })();
+</script>
+{% endblock %}

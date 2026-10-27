@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Products{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Products</h1>
+    <p class="sub">{{ products|length }} item{{ '' if products|length == 1 else 's' }}{% if q %} matching “{{ q }}”{% endif %}</p>
+  </div>
+  {% if session.role == 'admin' %}<div class="head-actions"><a class="btn primary" href="{{ url_for('product_add') }}">{{ icon('plus', 16) }} Add Product</a></div>{% endif %}
+</div>
+
+<form class="toolbar" method="get">
+  <div class="input-icon">{{ icon('search') }}<input name="q" value="{{ q }}" placeholder="Search by name, barcode or category"></div>
+  <button class="btn">Search</button>
+</form>
+
+<div class="card flush scroll">
+<table>
+  <tr><th>Product</th><th>Category</th><th class="r">Price</th><th class="r">GST</th><th class="r">Stock</th>{% if session.role == 'admin' %}<th></th>{% endif %}</tr>
+  {% for p in products %}
+  <tr>
+    <td><span class="cell-main">{{ p.name }}</span><span class="cell-sub">{{ p.barcode }}</span></td>
+    <td><span class="badge neutral">{{ p.category }}</span></td>
+    <td class="r cell-main">₹{{ '%.2f'|format(p.price) }}</td>
+    <td class="r muted">{{ '%g'|format(p.gst) }}%</td>
+    <td class="r">
+      {% if p.stock <= p.min_stock %}<span class="badge low">{{ '%g'|format(p.stock) }} {{ p.unit }} · Low</span>
+      {% else %}<span class="cell-main">{{ '%g'|format(p.stock) }}</span> <span class="muted">{{ p.unit }}</span>{% endif %}
+    </td>
+    {% if session.role == 'admin' %}
+    <td>
+      <div class="actions">
+        <a class="btn small" href="{{ url_for('product_edit', pid=p.id) }}">{{ icon('pencil', 14) }} Edit</a>
+        <form method="post" action="{{ url_for('product_delete', pid=p.id) }}" onsubmit="return confirm('Delete {{ p.name|e }}?')">
+          <button class="btn small danger">{{ icon('trash', 14) }} Delete</button>
+        </form>
+      </div>
+    </td>
+    {% endif %}
+  </tr>
+  {% else %}<tr class="empty-row"><td colspan="6">No products found.</td></tr>
+  {% endfor %}
+</table>
+</div>
+{% endblock %}

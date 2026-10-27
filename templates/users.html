@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Users</h1>
+    <p class="sub">Cashiers can bill but can't see reports or edit products.</p>
+  </div>
+</div>
+<div class="grid2">
+  <div class="card">
+    <h2>Add user</h2>
+    <form method="post">
+      <div class="field"><label for="username">Username</label><input id="username" name="username" required></div>
+      <div class="field"><label for="password">Password <small>min 6 characters</small></label><input id="password" name="password" type="password" required minlength="6"></div>
+      <div class="field"><label for="role">Role</label>
+        <select id="role" name="role"><option value="cashier">Cashier (billing only)</option><option value="admin">Admin (everything)</option></select></div>
+      <button class="btn primary">{{ icon('plus', 16) }} Add user</button>
+    </form>
+  </div>
+  <div class="card flush">
+    <div class="card-head"><h2>All users</h2><span class="hint">{{ users|length }} total</span></div>
+    <table>
+      <tr><th>Username</th><th>Role</th></tr>
+      {% for u in users %}<tr><td><div class="user-row"><span class="avatar">{{ u.username[0]|upper }}</span><span class="cell-main">{{ u.username }}</span></div></td><td><span class="badge {{ u.role }}">{{ u.role|capitalize }}</span></td></tr>{% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% from "_icons.html" import icon %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#047857">
+  <title>{% block title %}{{ SHOP_NAME }}{% endblock %}</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23047857'/%3E%3Ctext x='50' y='68' font-size='56' text-anchor='middle'%3E%F0%9F%9B%92%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  {% if session.user_id %}
+  {% set ep = request.endpoint %}
+  <header class="topbar no-print">
+    <button type="button" class="icon-btn" id="navToggle" aria-label="Open menu">{{ icon('menu', 20) }}</button>
+    <div class="topbar-brand"><span class="brand-mark sm">{{ icon('cart', 16) }}</span>{{ SHOP_NAME }}</div>
+    <a class="icon-btn" href="{{ url_for('billing') }}" aria-label="New bill">{{ icon('plus', 20) }}</a>
+  </header>
+  <div class="scrim" id="navScrim"></div>
+
+  <nav class="sidebar" id="sidebar">
+    <a class="brand" href="{{ url_for('dashboard') }}">
+      <span class="brand-mark">{{ icon('cart', 18) }}</span>
+      <span class="brand-name">{{ SHOP_NAME }}<small>Billing &amp; inventory</small></span>
+    </a>
+
+    <div class="nav">
+      <div class="nav-label">Sell</div>
+      <a href="{{ url_for('dashboard') }}" class="{{ 'active' if ep == 'dashboard' }}">{{ icon('dashboard') }}<span>Dashboard</span></a>
+      <a href="{{ url_for('billing') }}" class="{{ 'active' if ep == 'billing' }}">{{ icon('receipt') }}<span>New Bill</span></a>
+      <a href="{{ url_for('sales') }}" class="{{ 'active' if ep in ('sales', 'invoice') }}">{{ icon('history') }}<span>Sales History</span></a>
+
+      <div class="nav-label">Manage</div>
+      <a href="{{ url_for('products') }}" class="{{ 'active' if ep in ('products', 'product_add', 'product_edit') }}">{{ icon('package') }}<span>Products</span></a>
+      {% if session.role == 'admin' %}
+      <a href="{{ url_for('labels') }}" class="{{ 'active' if ep == 'labels' }}">{{ icon('tag') }}<span>Barcode Labels</span></a>
+      <a href="{{ url_for('reports') }}" class="{{ 'active' if ep == 'reports' }}">{{ icon('chart') }}<span>Reports</span></a>
+      <a href="{{ url_for('users') }}" class="{{ 'active' if ep == 'users' }}">{{ icon('users') }}<span>Users</span></a>
+      {% endif %}
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="nav foot">
+      <a href="{{ url_for('change_password') }}" class="{{ 'active' if ep == 'change_password' }}">{{ icon('key') }}<span>Change Password</span></a>
+    </div>
+    <div class="user-card">
+      <span class="avatar">{{ (session.username or '?')[0]|upper }}</span>
+      <div class="user-meta"><b>{{ session.username }}</b><small>{{ session.role|capitalize }}</small></div>
+      <a class="icon-btn ghost" href="{{ url_for('logout') }}" title="Log out" aria-label="Log out">{{ icon('logout') }}</a>
+    </div>
+  </nav>
+  {% endif %}
+
+  <main class="{{ 'with-sidebar' if session.user_id else 'auth' }}">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="toasts no-print" role="status" aria-live="polite">
+        {% for cat, msg in messages %}
+        <div class="flash {{ cat }}">
+          {{ icon('check' if cat == 'ok' else 'alert', 18) }}
+          <span>{{ msg }}</span>
+          <button type="button" class="flash-x" aria-label="Dismiss">{{ icon('x', 16) }}</button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+    <div class="{{ 'page' if session.user_id else 'auth-page' }}">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      // mobile menu
+      var b = document.body, t = document.getElementById('navToggle'), s = document.getElementById('navScrim');
+      if (t) t.addEventListener('click', function () { b.classList.toggle('nav-open'); });
+      if (s) s.addEventListener('click', function () { b.classList.remove('nav-open'); });
+      // flash messages: dismiss on click, auto-hide after a few seconds
+      document.querySelectorAll('.flash').forEach(function (f) {
+        function hide() { f.classList.add('out'); setTimeout(function () { f.remove(); }, 250); }
+        f.querySelector('.flash-x').addEventListener('click', hide);
+        setTimeout(hide, f.classList.contains('error') ? 7000 : 4500);
+      });
+    })();
+  </script>
+</body>
+</html>

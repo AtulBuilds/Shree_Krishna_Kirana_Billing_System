@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}{{ sale.invoice_no }}{% endblock %}
+{% block content %}
+<div class="no-print row-between invoice-bar">
+  <a class="btn" href="{{ url_for('billing') }}">{{ icon('arrow-left', 16) }} New Bill</a>
+  <button class="btn primary" onclick="window.print()">{{ icon('printer', 16) }} Print</button>
+</div>
+<div class="receipt card">
+  <div class="receipt-head">
+    <span class="brand-mark">{{ icon('cart', 22) }}</span>
+    <h2>{{ SHOP_NAME }}</h2>
+    <div>{{ SHOP_ADDRESS }}</div>
+    <div>Phone: {{ SHOP_PHONE }}</div>
+    {% if SHOP_GSTIN %}<div>GSTIN: {{ SHOP_GSTIN }}</div>{% endif %}
+  </div>
+  <hr>
+  <div class="meta">
+    <div><span>Invoice</span><b>{{ sale.invoice_no }}</b></div>
+    <div><span>Date</span><b>{{ sale.created_at }}</b></div>
+    <div><span>Customer</span><b>{{ sale.customer_name }}</b></div>
+    <div><span>Cashier</span><b>{{ sale.cashier }}</b></div>
+  </div>
+  <hr>
+  <table>
+    <tr><th>Item</th><th class="r">Qty</th><th class="r">Rate</th><th class="r">Amount</th></tr>
+    {% for i in items %}
+    <tr><td>{{ i.name }}</td><td class="r">{{ '%g'|format(i.qty) }}</td><td class="r">{{ '%.2f'|format(i.price) }}</td><td class="r">{{ '%.2f'|format(i.qty * i.price) }}</td></tr>
+    {% endfor %}
+  </table>
+  <hr>
+  <div class="line"><span>Subtotal</span><span>₹{{ '%.2f'|format(sale.subtotal) }}</span></div>
+  {% if sale.discount > 0 %}<div class="line"><span>Discount</span><span>- ₹{{ '%.2f'|format(sale.discount) }}</span></div>{% endif %}
+  <div class="line total"><span>TOTAL</span><span>₹{{ '%.2f'|format(sale.total) }}</span></div>
+  <div class="line muted"><span>(GST included in total)</span><span>₹{{ '%.2f'|format(sale.tax) }}</span></div>
+  <div class="line"><span>Paid by</span><span><b>{{ sale.payment_method }}</b></span></div>
+  <hr>
+  <div class="thanks">Thank you! Visit again 🙏</div>
+</div>
+{% endblock %}

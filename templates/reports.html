@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Reports</h1>
+    <p class="sub">{{ start }} → {{ end }}</p>
+  </div>
+  <div class="head-actions">
+    <a class="btn" href="{{ url_for('export_csv', start=start, end=end) }}">{{ icon('download', 16) }} Download CSV</a>
+  </div>
+</div>
+
+<div class="card filter-card">
+  <form class="toolbar" method="get">
+    <div class="field-inline"><label for="start">From</label><input id="start" type="date" name="start" value="{{ start }}"></div>
+    <div class="field-inline"><label for="end">To</label><input id="end" type="date" name="end" value="{{ end }}"></div>
+    <button class="btn primary">Show</button>
+  </form>
+</div>
+
+<div class="stats six">
+  <div class="card stat"><div class="stat-ico">{{ icon('rupee', 22) }}</div><div><span>Revenue</span><b>₹{{ '%.2f'|format(summary.revenue) }}</b></div></div>
+  <div class="card stat"><div class="stat-ico blue">{{ icon('receipt', 22) }}</div><div><span>Bills</span><b>{{ summary.bills }}</b></div></div>
+  <div class="card stat"><div class="stat-ico">{{ icon('trending', 22) }}</div><div><span>Estimated Profit</span><b>₹{{ '%.2f'|format(profit) }}</b></div></div>
+  <div class="card stat"><div class="stat-ico amber">{{ icon('tag', 22) }}</div><div><span>Discount Given</span><b>₹{{ '%.2f'|format(summary.discount) }}</b></div></div>
+  <div class="card stat"><div class="stat-ico violet">{{ icon('percent', 22) }}</div><div><span>GST Collected (incl.)</span><b>₹{{ '%.2f'|format(summary.tax) }}</b></div></div>
+  <div class="card stat"><div class="stat-ico blue">{{ icon('wallet', 22) }}</div><div><span>Stock Value (at cost)</span><b>₹{{ '%.2f'|format(stock_value) }}</b></div></div>
+</div>
+
+<div class="grid-main">
+  <div class="card"><div class="row-between" style="margin-bottom:14px"><h2>Daily Sales</h2></div><div class="chart-box"><canvas id="dailyChart"></canvas></div></div>
+  <div class="card"><div class="row-between" style="margin-bottom:14px"><h2>Category-wise Sales</h2></div><div class="chart-box"><canvas id="catChart"></canvas></div></div>
+</div>
+
+<div class="grid2">
+  <div class="card flush">
+    <div class="card-head"><h2>Top 10 Items</h2></div>
+    <div class="scroll">
+    <table>
+      <tr><th>Item</th><th class="r">Qty</th><th class="r">Sales</th><th class="r">Profit</th></tr>
+      {% for t in top %}<tr><td class="cell-main">{{ t.name }}</td><td class="r">{{ '%g'|format(t.qty) }}</td><td class="r">₹{{ '%.2f'|format(t.amount) }}</td><td class="r good">₹{{ '%.2f'|format(t.profit) }}</td></tr>
+      {% else %}<tr class="empty-row"><td colspan="4">No data.</td></tr>{% endfor %}
+    </table>
+    </div>
+  </div>
+  <div class="stack">
+    <div class="card flush">
+      <div class="card-head"><h2>Payment Methods</h2></div>
+      <table>
+        <tr><th>Method</th><th class="r">Bills</th><th class="r">Amount</th></tr>
+        {% for p in payments %}<tr><td><span class="badge neutral">{{ p.m }}</span></td><td class="r">{{ p.c }}</td><td class="r cell-main">₹{{ '%.2f'|format(p.total) }}</td></tr>
+        {% else %}<tr class="empty-row"><td colspan="3">No data.</td></tr>{% endfor %}
+      </table>
+    </div>
+    <div class="card flush">
+      <div class="card-head"><h2>Day-wise Table</h2></div>
+      <div class="table-scroll"><table>
+        <tr><th>Date</th><th class="r">Bills</th><th class="r">Total</th></tr>
+        {% for d in daily %}<tr><td>{{ d.day }}</td><td class="r">{{ d.bills }}</td><td class="r cell-main">₹{{ '%.2f'|format(d.total) }}</td></tr>
+        {% else %}<tr class="empty-row"><td colspan="3">No data.</td></tr>{% endfor %}
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+  if (window.KCharts) {
+    KCharts.line('dailyChart', {{ daily|map(attribute='day')|list|tojson }}, {{ daily|map(attribute='total')|list|tojson }});
+    KCharts.doughnut('catChart', {{ cats|map(attribute='cat')|list|tojson }}, {{ cats|map(attribute='amount')|list|tojson }});
+  }
+</script>
+{% endblock %}

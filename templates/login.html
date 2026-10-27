@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Login - {{ SHOP_NAME }}{% endblock %}
+{% block content %}
+<div class="auth-art">
+  <div class="brand">
+    <span class="brand-mark">{{ icon('cart', 20) }}</span>
+    <span class="brand-name">{{ SHOP_NAME }}<small>Billing &amp; inventory</small></span>
+  </div>
+  <div>
+    <h2>Fast, simple billing for your shop.</h2>
+    <p class="lead">Scan, bill and print in seconds — and always know what's selling and what's running low.</p>
+    <ul class="auth-points">
+      <li><span class="pt">{{ icon('scan') }}</span>Barcode scanning at the counter</li>
+      <li><span class="pt">{{ icon('receipt') }}</span>Printable GST-inclusive invoices</li>
+      <li><span class="pt">{{ icon('bell') }}</span>Low-stock alerts and sales reports</li>
+    </ul>
+  </div>
+  <div class="auth-foot">{{ SHOP_ADDRESS }}</div>
+</div>
+
+<div class="auth-form-wrap">
+  <div class="auth-card">
+    <span class="brand-mark mobile-brand">{{ icon('cart', 20) }}</span>
+    <h1>Welcome back</h1>
+    <p class="sub">Sign in to {{ SHOP_NAME }} to continue.</p>
+    <form method="post">
+      <div class="field">
+        <label for="username">Username</label>
+        <div class="input-icon">{{ icon('user') }}<input id="username" name="username" autocomplete="username" autofocus required></div>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-icon pw">
+          {{ icon('lock') }}<input id="password" name="password" type="password" autocomplete="current-password" required>
+          <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">{{ icon('eye') }}</button>
+        </div>
+      </div>
+      <button class="btn primary full">Sign in</button>
+    </form>
+  </div>
+</div>
+<script>
+  document.getElementById('pwToggle').addEventListener('click', function () {
+    var i = document.getElementById('password');
+    i.type = i.type === 'password' ? 'text' : 'password';
+  });
+</script>
+{% endblock %}

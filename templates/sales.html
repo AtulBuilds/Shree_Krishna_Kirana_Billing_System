@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Sales History{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Sales History</h1>
+    <p class="sub">{{ sales|length }} bill{{ '' if sales|length == 1 else 's' }} on the selected day{% if sales %} · ₹{{ '%.2f'|format(total) }}{% endif %}</p>
+  </div>
+</div>
+
+<form class="toolbar" method="get">
+  <div class="field-inline"><label for="date">Date</label><input id="date" type="date" name="date" value="{{ day }}"></div>
+  <button class="btn primary">Show</button>
+</form>
+
+<div class="card flush scroll">
+<table>
+  <tr><th>Invoice</th><th>Time</th><th>Customer</th><th>Payment</th><th>Cashier</th><th class="r">Total</th></tr>
+  {% for s in sales %}
+  <tr>
+    <td><a href="{{ url_for('invoice', sale_id=s.id) }}">{{ s.invoice_no }}</a></td>
+    <td class="muted">{{ s.created_at[11:16] }}</td><td>{{ s.customer_name }}</td><td><span class="badge neutral">{{ s.payment_method }}</span></td><td class="muted">{{ s.cashier }}</td>
+    <td class="r cell-main">₹{{ '%.2f'|format(s.total) }}</td>
+  </tr>
+  {% else %}<tr class="empty-row"><td colspan="6">No bills on this date.</td></tr>
+  {% endfor %}
+  {% if sales %}<tr class="total-row"><th colspan="5" class="r">Day total</th><th class="r">₹{{ '%.2f'|format(total) }}</th></tr>{% endif %}
+</table>
+</div>
+{% endblock %}
